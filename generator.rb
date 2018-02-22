@@ -28,8 +28,7 @@ code_eval = %(
 ).lines.map(&:strip).join
 code_end = "\nEOF\n#{code_eval}"
 image = ChunkyPNG::Image.from_file 'input.png'
-
-code = "print('hello');"
+code = File.read 'code.pl' rescue "print 'hello'"
 
 w = 56
 h = 40
