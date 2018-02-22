@@ -24,11 +24,11 @@ code_eval = %(
     }
     $e.=chr$d;
   }
-  eval$e;
+  exec'ruby','-e',$e;
 ).lines.map(&:strip).join
 code_end = "\nEOF\n#{code_eval}"
 image = ChunkyPNG::Image.from_file 'input.png'
-code = File.read 'code.pl' rescue "print 'hello'"
+code = File.read 'code.rb' rescue "print 'hello'"
 
 w = 56
 h = 40
