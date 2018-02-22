@@ -1,3 +1,4 @@
+require 'chunky_png'
 def header w, h
   i2s = ->(n) { 4.times.map { |i|((n >> (8 * i)) & 0xff).chr }.join }
   a = "BM#{i2s[54+w*h*4]}\0\0\0\0#{i2s[54]}#{i2s[40]}#{i2s[w]}#{i2s[h]}"
@@ -5,9 +6,44 @@ def header w, h
   a + b
 end
 
-code_begin = %(\n;use MIME::Base64;exec('ruby','-e',decode_base64(<<'EOS'));\n)
-code_end = "\nEOS\n"
+whs=[*0..256].repeated_permutation(2).select do |a, b|
+  next false unless a < b
+  next false unless ((a*b*4+54)>>8)&0xff=='#'.ord
+  next false unless [*?a..?z,*?A..?Z,*?0..?9,?;].include? ((a*b*4+54)&0xff).chr
+  a > b / 2
+end
+p whs.sort_by{|a,b|a*b}.map{|a,b|[[a,b],(a*b)]}
 
+code_begin = %(\n;$a=<<'EOF';\n)
+code_eval = %(
+  $e='';
+  for$b($a=~/..../g){
+    $d=0;
+    for$c($b=~/./g){
+      $d=$d*4+ord($c)%4;
+    }
+    $e.=chr$d;
+  }
+  eval$e;
+).lines.map(&:strip).join
+code_end = "\nEOF\n#{code_eval}"
+image = ChunkyPNG::Image.from_file 'input.png'
 
+code = "print('hello');"
 
-File.write 'out.bmp', header(40, 56)+code_begin + 'a'*(40*56*4-code_begin.size-code_end.size) + code_end
+w = 56
+h = 40
+File.write 'out.bmp', [
+  header(w, h),
+  (4 * w * h - code_end.size).times.map do |i|
+    next code_begin[i] if i < code_begin.size
+    pos, cidx = i.divmod 4
+    y, x = pos.divmod w
+    color = image[x * image.width / w, (h - y - 1) * image.height / h]
+    col = cidx == 3 ? 0xff : (color >> (8 * (cidx+1))) & 0xff
+    cidx, coffset = (i - code_begin.size).divmod 4
+    bit2 = ((code[cidx] || ' ').ord >> (2*(3-coffset))) & 3
+    ((col & 0xfc) | bit2).chr
+  end.join,
+  code_end
+].join
