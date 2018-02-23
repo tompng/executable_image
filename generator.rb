@@ -24,7 +24,7 @@ code_eval = %(
     }
     $e.=chr$d;
   }
-  exec'ruby','-e',$e;
+  exec'ruby','-e',$e
 ).lines.map(&:strip).join
 code_end = "\nEOF\n#{code_eval}"
 
