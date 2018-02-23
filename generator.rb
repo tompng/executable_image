@@ -27,6 +27,7 @@ code_eval = %(
   exec'ruby','-e',$e;
 ).lines.map(&:strip).join
 code_end = "\nEOF\n#{code_eval}"
+
 image = ChunkyPNG::Image.from_file 'input.png'
 code = File.read 'code.rb' rescue "print 'hello'"
 
@@ -42,6 +43,7 @@ File.write 'out.bmp', [
     col = cidx == 3 ? 0xff : (color >> (8 * (cidx+1))) & 0xff
     cidx, coffset = (i - code_begin.size).divmod 4
     bit2 = ((code[cidx] || ' ').ord >> (2*(3-coffset))) & 3
+    col = 4 if col&0xfc == 8
     ((col & 0xfc) | bit2).chr
   end.join,
   code_end
