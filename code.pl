@@ -1,6 +1,6 @@
 @tbl=split//,'QBMW#TTVQQd8PVV*pQAk5Y7*pgyxJ?7*ggau{1/"gau](:~^gau;;--`a,,,,.. ';
 use List::Util qw( min max );
-$w=80;$h=80;$pi=3.1416;
+$w=80;$h=80;$pi=3.14159265358979323846;
 @coords=[];
 @base=[];
 for($i=0;$i<80;$i++){
@@ -20,7 +20,7 @@ for($i=0;$i<80;$i++){
   }
   $coords[$i]=\@aa;
 }
-# print"\e[2J";
+print"\e[2J";
 $rot=0;
 
 while(1){
@@ -74,11 +74,11 @@ while(1){
   for($i=0;$i<$#coords;$i++){
     $size=80;
     for($j=0;$j<$size;$j++){
-      fill($coords[$i][$i],$coords[$i+1][$i],$coords[$i][($i+1)% $size]);
-      fill($coords[$i][($i+1)% $size],$coords[$i+1][($i+1)% $size],$coords[$i+1][$i]);
+      fill($coords[$i][$j],$coords[$i+1][$j],$coords[$i][($j+1)% $size]);
+      fill($coords[$i][($j+1)% $size],$coords[$i+1][($j+1)% $size],$coords[$i+1][$j]);
     }
   }
-  # print"\e[1;1H";
+  print"\e[1;1H";
   $s='';
   for($i=0;$i<$h;$i+=2){
     for($j=0;$j<$w;$j++){
@@ -87,5 +87,4 @@ while(1){
     $s.="\n";
   }
   print$s;
-  exit;
 }
