@@ -1,4 +1,5 @@
 @tbl=split//,'QBMW#TTVQQd8PVV*pQAk5Y7*pgyxJ?7*ggau{1/"gau](:~^gau;;--`a,,,,.. ';
+use List::Util qw( min max );
 $w=80;$h=80;$pi=3.1416;
 @coords=[];
 @base=[];
@@ -24,67 +25,60 @@ $rot=0;
 
 while(1){
   $rot+=0.05;
-  $cz=cos$rot;$sz=sin$rot;
+  $cosz=cos$rot;$sinz=sin$rot;
   $rx=sin($rot*0.31);
-  $cx=cos($rx);$sx=sin($rx);
+  $cosx=cos($rx);$sinx=sin($rx);
   @col=map{my@a=map{1}@base;\@a}@base;
   @dep=map{my@a=map{999}@base;\@a}@base;
   sub conv{
     $x=shift;$y=shift;$z=shift;
     $s=$w/4.0;
-    ($y,$z)=($y*$cx-$z*$sx,$z*$cx+$y*$sx);
-    ($x,$y)=($x*$cz-$y*$sz,$y*$cz+$x*$sz);
+    ($y,$z)=($y*$cosx-$z*$sinx,$z*$cosx+$y*$sinx);
+    ($x,$y)=($x*$cosz-$y*$sinz,$y*$cosz+$x*$sinz);
     ($w/2+$s*$x,$s*$y,$h/2+$s*$z)
   }
-  # sub fill{
-  #   $a=shift;$b=shift;$c=shift;
-  #   ax,ay,az=a
-  #   bx,by,bz=b
-  #   cx,cy,cz=c
-  #   ax,ay,az=conv[ax,ay,az]
-  #   bx,by,bz=conv[bx,by,bz]
-  #   cx,cy,cz=conv[cx,cy,cz]
-  #
-  #   sx,sy,sz=bx-ax,by-ay,bz-az
-  #   tx,ty,tz=cx-ax,cy-ay,cz-az
-  #   nx,ny,nz=sy*tz-sz*ty,sz*tx-tz*sx,sx*ty-sy*tx
-  #   nr=(nx*nx+ny*ny+nz*nz)**0.5
-  #   nx/=nr;ny/=nr;nz/=nr;
-  #   nx,ny,nz=-nx,-ny,-nz if ny<0
-  #   cc=(nx+1)*0.4
-  #   x0,x1=[ax,bx,cx].minmax
-  #   z0,z1=[az,bz,cz].minmax
-  #   x0=0 if x0<0
-  #   z0=0 if z0<0
-  #   x1=w-1 if x1>=w
-  #   z1=h-1 if z1>=h
-  #   (x0.ceil..x1.floor).each{|ix|(z0.ceil..z1.floor).each{|iz|
-  #     a,b,p=bx-ax,cx-ax,ix-ax
-  #     c,d,q=bz-az,cz-az,iz-az
-  #     det=a*d-b*c
-  #     s=(d*p-b*q)/det
-  #     t=(a*q-c*p)/det
-  #     next unless s+t<=1&&0<=s&&0<=t
-  #     d=ay+(by-ay)*s+(cy-ay)*t
-  #     if d<dep[iz][ix]
-  #       dep[iz][ix]=d
-  #       col[iz][ix]=cc
-  #     end
-  #   }}
-  # }
-  # (coords.size-1).times{|i|
-  #   ca,cb=coords[i],coords[i+1]
-  #   (ca.size).times{|i|
-  #     fill[ca[i],cb[i],ca[(i+1)%ca.size]]
-  #     fill[ca[(i+1)%ca.size],cb[(i+1)%cb.size],cb[i]]
-  #   }
-  # }
-  for($i=0;$i<$h;$i++){
-    for($j=0;$j<$w;$j++){
-      if(($i-40)**2+($j-40)**2<400){$col[$i][$j]=0;}
+  sub fill{
+    $a=shift;$b=shift;$c=shift;
+    ($ax,$ay,$az)=conv($a->[0],$a->[1],$a->[2]);
+    ($bx,$by,$bz)=conv($b->[0],$b->[1],$b->[2]);
+    ($cx,$cy,$cz)=conv($c->[0],$c->[1],$c->[2]);
+    $sx=$bx-$ax;$sy=$by-$ay;$sz=$bz-$az;
+    $tx=$cx-$ax;$ty=$cy-$ay;$tz=$cz-$az;
+    $nx=$sy*$tz-$sz*$ty;$ny=$sz*$tx-$tz*$sx;$nz=$sx*$ty-$sy*$tx;
+    $nr=($nx*$nx+$ny*$ny+$nz*$nz)**0.5;
+    $nx/=$nr;$ny/=$nr;$nz/=$nr;
+    if($ny<0){($nx,$ny,$nz)=(-$nx,-$ny,-$nz)}
+    $cc=($nx+1)*0.4;
+    $x0=int(min($ax,$bx,$cx));$x1=int(max($ax,$bx,$cx));
+    $z0=int(min($az,$bz,$cz));$z1=int(max($az,$bz,$cz));
+    if($x0<0){$x0=0}
+    if($z0<0){$z0=0}
+    if($x1>=$w){$x1=$w-1}
+    if($z1>=$w){$z1=$h-1}
+    $a=$bx-$ax;$b=$cx-$ax;
+    $c=$bz-$az;$d=$cz-$az;
+    $det=$a*$d-$b*$c;
+    for($ix=$x0;$ix<=$x1;$ix++){for($iz=$z0;$iz<=$z1;$iz++){
+      $p=$ix-$ax;$q=$iz-$az;
+      $s=($d*$p-$b*$q)/$det;
+      $t=($a*$q-$c*$p)/$det;
+      if($s+$t<=1&&0<=$s&&0<=$t){
+        $dp=$ay+($by-$ay)*$s+($cy-$ay)*$t;
+        if($dp<$dep[$iz][$ix]){
+          $dep[$iz][$ix]=$dp;
+          $col[$iz][$ix]=$cc;
+        }
+      }
+    }}
+  }
+  for($i=0;$i<$#coords;$i++){
+    $size=80;
+    for($j=0;$j<$size;$j++){
+      fill($coords[$i][$i],$coords[$i+1][$i],$coords[$i][($i+1)% $size]);
+      fill($coords[$i][($i+1)% $size],$coords[$i+1][($i+1)% $size],$coords[$i+1][$i]);
     }
   }
-  print"\e[1;1H";
+  # print"\e[1;1H";
   $s='';
   for($i=0;$i<$h;$i+=2){
     for($j=0;$j<$w;$j++){
@@ -93,4 +87,5 @@ while(1){
     $s.="\n";
   }
   print$s;
+  exit;
 }
