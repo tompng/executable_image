@@ -9,7 +9,7 @@ for($i=0;$i<80;$i++){
   $r=16**(-$th/30);
   $c=cos$th;$s=sin$th;
   my@aa=[];
-  for($j=0;$j<80;$j++){
+  for($j=0;$j<20;$j++){
     $t=2*$pi*$j/20;
     $x=cos$t;$z=sin$t;
     $l=1+((cos(5*$t)+sin(3*$t))*cos(2.3*$th))**2*0.1;
@@ -49,8 +49,8 @@ while(1){
     $nx/=$nr;$ny/=$nr;$nz/=$nr;
     if($ny<0){($nx,$ny,$nz)=(-$nx,-$ny,-$nz)}
     $cc=($nx+1)*0.4;
-    $x0=int(min($ax,$bx,$cx));$x1=int(max($ax,$bx,$cx));
-    $z0=int(min($az,$bz,$cz));$z1=int(max($az,$bz,$cz));
+    $x0=int(min($ax,$bx,$cx))+1;$x1=int(max($ax,$bx,$cx));
+    $z0=int(min($az,$bz,$cz))+1;$z1=int(max($az,$bz,$cz));
     if($x0<0){$x0=0}
     if($z0<0){$z0=0}
     if($x1>=$w){$x1=$w-1}
@@ -72,7 +72,7 @@ while(1){
     }}
   }
   for($i=0;$i<$#coords;$i++){
-    $size=80;
+    $size=20;
     for($j=0;$j<$size;$j++){
       fill($coords[$i][$j],$coords[$i+1][$j],$coords[$i][($j+1)% $size]);
       fill($coords[$i][($j+1)% $size],$coords[$i+1][($j+1)% $size],$coords[$i+1][$j]);
