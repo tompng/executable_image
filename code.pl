@@ -1,4 +1,6 @@
 @tbl=split//,'QBMW#TTVQQd8PVV*pQAk5Y7*pgyxJ?7*ggau{1/"gau](:~^gau;;--`a,,,,.. ';
+@msg=("\x82\b\x0F\x0E","\x82\x14\x11\x11","D\x14\xA1 ","D\"\xA1\x00","(>\x91\x00","(\"\x8F\x00","\x10A\x81\x00","\x10A\x81 ","\x10A\x01\x11","\x10A\x01\x0E",
+"L\x95\$\x12","\xD2\xB4\xAA*","\xD2\xD4\xAE:","L\x95J)");
 use List::Util qw( min max );
 $w=80;$h=80;$pi=3.14159265358979323846;
 @coords=[];
@@ -15,7 +17,7 @@ for($i=0;$i<80;$i++){
     $l=1+((cos(5*$t)+sin(3*$t))*cos(2.3*$th))**2*0.1;
     ($x,$y,$z)=($x*$l+0.8,sin(3*$t)*0.1,$z*$l*0.75);
     ($x,$y)=($x*$c+$y*$s,$y*$c-$x*$s);
-    my@a=($x*$r,$y*$r,$z*$r+$r*2.5-1.8);
+    my@a=($x*$r,$y*$r,$z*$r+$r*2.5-1.6);
     $aa[$j]=\@a;
   }
   $coords[$i]=\@aa;
@@ -76,6 +78,14 @@ while(1){
     for($j=0;$j<$size;$j++){
       fill($coords[$i][$j],$coords[$i+1][$j],$coords[$i][($j+1)% $size]);
       fill($coords[$i][($j+1)% $size],$coords[$i+1][($j+1)% $size],$coords[$i+1][$j]);
+    }
+  }
+  for($i=0;$i<28;$i++){
+    for($j=0;$j<64;$j++){
+      $o=ord(substr$msg[$i/2],$j/16,1)>>($j/2%8);
+      if($o&1==1){
+        $col[$i+($i<20?1:51)][8+$j]=0;
+      }
     }
   }
   print"\e[1;1H";
