@@ -17,15 +17,15 @@ p whs.sort_by{|a,b|a*b}.map{|a,b|[[a,b],(a*b)]}
 code_begin = %(\n;$a=<<'EOF';\n)
 code_eval = %(
   $e='';
-  for$b($a=~/..../g){
+  for$b($a=~/.../g){
     $d=0;
     for$c($b=~/./g){
-      $d=$d*4+ord($c)%4;
+      $d=$d*8+ord($c)%8;
     }
     $e.=chr$d;
   }
 ).lines.map(&:strip).join
-code_eval += "print$e"
+code_eval += "eval$e"
 code_end = "\nEOF\n#{code_eval}"
 
 image = ChunkyPNG::Image.from_file 'input.png'
@@ -41,10 +41,10 @@ File.write 'out.bmp', [
     y, x = pos.divmod w
     color = image[x * image.width / w, (h - y - 1) * image.height / h]
     col = (color >> (8 * (cidx+1))) & 0xff
-    cidx, coffset = (i - code_begin.size).divmod 4
-    bit2 = ((code[cidx] || ' ').ord >> (2*(3-coffset))) & 3
+    cidx, coffset = (i - code_begin.size).divmod 3
+    bit2 = ((code[cidx] || ' ').ord >> (3*(2-coffset))) & 7
     col = 4 if col&0xfc == 8
-    ((col & 0xfc) | bit2).chr
+    ((col & 0xf8) | bit2).chr
   end.join,
   code_end
 ].join
