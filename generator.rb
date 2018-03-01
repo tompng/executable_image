@@ -42,7 +42,7 @@ File.write 'out.bmp', [
     next code_begin[i] if i < code_begin.size
     pos, cidx = i.divmod 3
     y, x = pos.divmod w
-    color = image[x * image.width / w, (h - y - 1) * image.height / h]
+    color = image[((x+0.5) * image.width / w).floor, ((h - y - 0.5) * image.height / h).floor]
     col = (color >> (8 * (cidx+1))) & 0xff
     cidx, coffset = (i - code_begin.size).divmod 3
     bit3 = ((code[cidx] || ' ').ord >> (3*(2-coffset))) & 7
