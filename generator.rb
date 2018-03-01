@@ -46,7 +46,7 @@ File.write 'out.bmp', [
     col = (color >> (8 * (cidx+1))) & 0xff
     cidx, coffset = (i - code_begin.size).divmod 3
     bit3 = ((code[cidx] || ' ').ord >> (3*(2-coffset))) & 7
-    col = 4 if col&0xfc == 8
+    col = 0 if col&0xf8 == 0x0d&0xf8 # avoid \x0d
     ((col & 0xf8) | bit3).chr
   end.join,
   code_end
